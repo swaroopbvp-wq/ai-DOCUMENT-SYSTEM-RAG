@@ -2,7 +2,7 @@ import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-# ------------------ LOAD MODEL ------------------
+# ------------------ LOAD EMBEDDING MODEL ------------------
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 dimension = 384
@@ -32,7 +32,7 @@ def chunk_text(text: str, chunk_size: int = 300, overlap: int = 50):
 
 # ------------------ EMBEDDING ------------------
 def embed_text(text: str):
-    embedding = model.encode(text)
+    embedding = model.encode([text])[0]
     return np.array(embedding).astype("float32")
 
 
@@ -42,6 +42,7 @@ def add_document(doc_id: int, content: str):
     chunks = chunk_text(content)
 
     if not chunks:
+        print("No chunks created for document:", doc_id)
         return
 
     for chunk in chunks:
@@ -55,16 +56,25 @@ def add_document(doc_id: int, content: str):
             "content": chunk
         })
 
+    print(f"Indexed {len(chunks)} chunks for document {doc_id}")
+    print("Total vectors in FAISS:", index.ntotal)
+
 
 # ------------------ SEARCH ------------------
 def search(query: str, document_id: int = None, top_k: int = 5):
 
     if index.ntotal == 0:
+        print("FAISS index empty")
         return []
 
-    query_vector = np.array([embed_text(query)])
+    query_vector = embed_text(query).reshape(1, -1)
 
-    D, I = index.search(query_vector, top_k)
+    # 🔥 Search more than needed (important for filtering)
+    D, I = index.search(query_vector, 20)
+
+    print("FAISS distances:", D)
+    print("FAISS indexes:", I)
+    print("Total stored docs:", len(documents))
 
     results = []
 
@@ -75,9 +85,16 @@ def search(query: str, document_id: int = None, top_k: int = 5):
 
         doc = documents[idx]
 
+        # ✅ FIXED FILTER (this was your main bug)
         if document_id is not None and doc["doc_id"] != document_id:
             continue
 
         results.append(doc["content"])
+
+        # stop once we have enough
+        if len(results) >= top_k:
+            break
+
+    print("Final retrieved results:", results)
 
     return results

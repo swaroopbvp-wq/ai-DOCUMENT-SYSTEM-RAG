@@ -6,3 +6,4 @@ pdfplumber
 python-docx
 numpy
 python-multipart
+google-generativeai
