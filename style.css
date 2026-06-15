@@ -1,208 +1,1071 @@
 /* =========================
-   GLOBAL
+GLOBAL
 ========================= */
-* {
-  box-sizing: border-box;
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
 }
 
-body {
-  margin: 0;
-  font-family: "Segoe UI", sans-serif;
+body{
 
-  background: linear-gradient(-45deg, #f0f4f8, #dbe9f4, #e3f2fd, #f5f5f5);
-  background-size: 400% 400%;
-  animation: gradientShift 10s ease infinite;
+font-family:
+"Segoe UI",
+sans-serif;
 
-  min-height: 100vh;
-  padding: 80px 20px 40px;
+background:
+linear-gradient(
+-45deg,
+#f0f4f8,
+#dbe9f4,
+#e3f2fd,
+#f5f5f5
+);
+
+background-size:
+400% 400%;
+
+animation:
+gradientShift
+10s ease infinite;
+
+min-height:
+100vh;
+
+padding:
+80px 20px;
+
+transition:
+0.3s;
+
 }
 
-/* Dark mode */
-.dark-mode {
-  background: linear-gradient(-45deg, #1a1a1a, #2c2c2c, #333, #111);
-  color: white;
-}
+
 
 /* =========================
-   ANIMATIONS
+BACKGROUND
 ========================= */
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+
+@keyframes gradientShift{
+
+0%{
+background-position:
+0% 50%;
 }
+
+50%{
+background-position:
+100% 50%;
+}
+
+100%{
+background-position:
+0% 50%;
+}
+
+}
+
+
+
 
 /* =========================
-   TOP BAR
+DARK MODE
 ========================= */
-.top-bar {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  display: flex;
-  justify-content: space-between;
-  z-index: 1000;
+
+.dark-mode{
+
+background:
+linear-gradient(
+-45deg,
+#111,
+#222,
+#333,
+#111
+);
+
+color:
+white;
+
 }
+
+
+
 
 /* =========================
-   MAIN CONTAINER
+TOP BAR
 ========================= */
-.container {
-  background: rgba(255, 255, 255, 0.95);
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  text-align: center;
+
+.top-bar{
+
+position:
+fixed;
+
+top:
+20px;
+
+left:
+20px;
+
+right:
+20px;
+
+display:
+flex;
+
+justify-content:
+space-between;
+
+align-items:
+center;
+
+z-index:
+1000;
+
 }
 
-.dark-mode .container {
-  background: rgba(40, 40, 40, 0.95);
-  color: white;
-}
+
+
 
 /* =========================
-   HEADINGS
+RECENTS
 ========================= */
-h1 {
-  font-size: 24px;
-  margin-bottom: 20px;
+
+.dropdown{
+
+position:
+relative;
+
 }
+
+
+
+.dropbtn{
+
+background:
+#0078d4;
+
+padding:
+12px 18px;
+
+border:
+none;
+
+border-radius:
+12px;
+
+color:
+white;
+
+cursor:
+pointer;
+
+}
+
+
+
+.dropdown-content{
+
+display:
+none;
+
+position:
+absolute;
+
+top:
+60px;
+
+left:
+0;
+
+width:
+250px;
+
+background:
+rgba(
+40,
+40,
+40,
+0.95
+);
+
+padding:
+10px;
+
+border-radius:
+14px;
+
+max-height:
+300px;
+
+overflow-y:
+auto;
+
+}
+
+
+
+.dropdown-content.show{
+
+display:
+block;
+
+}
+
+
+
+.dropdown-content div{
+
+padding:
+12px;
+
+cursor:
+pointer;
+
+color:
+white;
+
+border-radius:
+10px;
+
+}
+
+
+
+.dropdown-content div:hover{
+
+background:
+#0078d4;
+
+}
+
+
+
 
 /* =========================
-   FILE UPLOAD
+SETTINGS
 ========================= */
-.custom-upload label {
-  display: inline-block;
-  padding: 12px 20px;
-  background-color: #0078d4;
-  color: white;
-  border-radius: 8px;
-  cursor: pointer;
+
+.settings{
+
+position:
+relative;
+
 }
 
-.custom-upload input {
-  display: none;
+
+
+#settingsBtn{
+
+background:
+#0078d4;
+
+padding:
+14px;
+
+border:
+none;
+
+border-radius:
+50%;
+
+color:
+white;
+
+font-size:
+18px;
+
+cursor:
+pointer;
+
 }
 
-#fileDetails {
-  margin-top: 8px;
-  font-size: 14px;
-  color: #555;
+
+
+.settings-panel{
+
+display:
+none;
+
+position:
+absolute;
+
+top:
+65px;
+
+right:
+0;
+
+background:
+white;
+
+padding:
+15px;
+
+width:
+180px;
+
+border-radius:
+15px;
+
+box-shadow:
+0 10px 25px rgba(
+0,
+0,
+0,
+0.15
+);
+
+flex-direction:
+column;
+
+gap:
+12px;
+
 }
 
-.dark-mode #fileDetails {
-  color: #ccc;
+
+
+.settings-panel.show{
+
+display:
+flex;
+
 }
+
+
+
+.settings-panel button{
+
+padding:
+12px;
+
+border:
+none;
+
+border-radius:
+10px;
+
+cursor:
+pointer;
+
+}
+
+
+
+.dark-mode
+.settings-panel{
+
+background:
+#333;
+
+color:
+white;
+
+}
+
+
+
 
 /* =========================
-   INPUT
+MAIN CARD
 ========================= */
-.input-group {
-  margin-top: 20px;
+
+.container{
+
+background:
+rgba(
+255,
+255,
+255,
+0.95
+);
+
+max-width:
+900px;
+
+margin:
+50px auto;
+
+padding:
+70px 80px;
+
+border-radius:
+30px;
+
+box-shadow:
+0 20px 50px rgba(
+0,
+0,
+0,
+0.15
+);
+
+display:
+flex;
+
+flex-direction:
+column;
+
+align-items:
+center;
+
+text-align:
+center;
+
+gap:
+30px;
+
 }
 
-.input-group input {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+
+
+.dark-mode
+.container{
+
+background:
+rgba(
+25,
+25,
+25,
+0.95
+);
+
+color:
+white;
+
 }
+
+
+
 
 /* =========================
-   BUTTON
+GREETING
 ========================= */
-button {
-  margin-top: 15px;
-  padding: 12px 18px;
-  font-size: 16px;
-  background-color: #0078d4;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+
+#greetingMsg{
+
+font-size:
+40px;
+
+font-weight:
+700;
+
+text-align:
+center;
+
 }
 
-button:hover {
-  background-color: #005fa3;
-}
+
+
 
 /* =========================
-   RESPONSE BOX (IMPORTANT)
+TITLE
 ========================= */
-#responseBox {
-  margin-top: 20px;
-  padding: 15px;
-  background: #f0f4f8;
-  border-radius: 8px;
-  min-height: 50px;
-  font-size: 15px;
-  color: #222;
-  text-align: left;
-  white-space: pre-wrap;
+
+h1{
+
+font-size:
+55px;
+
+font-weight:
+800;
+
+text-align:
+center;
+
+line-height:
+1.2;
+
 }
 
-.dark-mode #responseBox {
-  background: #333;
-  color: #eee;
-}
+
+
 
 /* =========================
-   MESSAGE BOX
+SUBTITLE
 ========================= */
-#messageBox {
-  margin-top: 15px;
-  padding: 12px;
-  background: #ffe0e0;
-  color: #a33;
-  border-radius: 8px;
-  display: none;
+
+.container p{
+
+font-size:
+20px;
+
+color:
+gray;
+
+text-align:
+center;
+
 }
+
+
+
+.dark-mode
+.container p{
+
+color:
+#ccc;
+
+}
+
+
+
 
 /* =========================
-   CHATBOT
+UPLOAD
 ========================= */
-.chatbot-wrapper {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
+
+.custom-upload{
+
+display:
+flex;
+
+flex-direction:
+column;
+
+align-items:
+center;
+
+gap:
+20px;
+
+margin:
+10px 0 30px;
+
 }
 
-.chatbot-button {
-  background-color: #0078d4;
-  color: white;
-  font-size: 24px;
-  padding: 14px;
-  border-radius: 50%;
-  cursor: pointer;
+
+
+.custom-upload label{
+
+padding:
+18px 30px;
+
+background:
+#0078d4;
+
+color:
+white;
+
+border-radius:
+15px;
+
+cursor:
+pointer;
+
+font-size:
+18px;
+
 }
 
-.chatbot-panel {
-  display: none;
-  margin-top: 10px;
-  background: white;
-  padding: 12px;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+
+
+.custom-upload input{
+
+display:
+none;
+
 }
 
-.dark-mode .chatbot-panel {
-  background: #333;
-  color: white;
+
+
+#fileDetails{
+
+font-size:
+16px;
+
+text-align:
+center;
+
+line-height:
+1.8;
+
+padding:
+10px;
+
+max-width:
+100%;
+
+word-wrap:
+break-word;
+
 }
+
+
+
 
 /* =========================
-   GREETING
+INPUT
 ========================= */
-#greetingMsg {
-  font-size: 18px;
-  margin-bottom: 10px;
-  color: #444;
+
+.input-group{
+
+width:
+100%;
+
+margin-top:
+20px;
+
 }
 
-.dark-mode #greetingMsg {
-  color: #ddd;
+
+
+.input-group{
+
+width:
+100%;
+
+margin-top:
+20px;
+
+display:
+flex;
+
+align-items:
+center;
+
+gap:
+12px;
+
 }
+
+
+
+.input-group input{
+
+flex:
+1;
+
+padding:
+22px;
+
+font-size:
+18px;
+
+border:
+1px solid #ddd;
+
+border-radius:
+18px;
+
+outline:
+none;
+
+}
+
+
+
+.dark-mode
+.input-group input{
+
+background:
+#222;
+
+color:
+white;
+
+border:
+1px solid #444;
+
+}
+
+
+
+
+/* =========================
+SUBMIT BUTTON
+========================= */
+
+#submitBtn{
+
+padding:
+18px 40px;
+
+background:
+#0078d4;
+
+color:
+white;
+
+border:
+none;
+
+border-radius:
+15px;
+
+font-size:
+18px;
+
+cursor:
+pointer;
+
+transition:
+0.2s;
+
+}
+
+
+
+#submitBtn:hover{
+
+transform:
+scale(
+1.04
+);
+
+}
+
+
+
+
+/* =========================
+CHAT
+========================= */
+
+#responseBox{
+
+width:
+100%;
+
+display:
+flex;
+
+flex-direction:
+column;
+
+gap:
+20px;
+
+margin-top:
+30px;
+
+}
+
+
+
+.user-message{
+
+align-self:
+flex-end;
+
+background:
+#0078d4;
+
+padding:
+18px;
+
+border-radius:
+18px;
+
+max-width:
+70%;
+
+color:
+white;
+
+animation:
+fadeIn 0.4s ease;
+
+}
+
+
+
+.ai-message{
+
+align-self:
+flex-start;
+
+background:
+#f1f5f9;
+
+padding:
+18px;
+
+border-radius:
+18px;
+
+max-width:
+75%;
+
+animation:
+fadeIn 0.4s ease;
+
+}
+
+
+
+.dark-mode
+.ai-message{
+
+background:
+#333;
+
+color:
+white;
+
+}
+
+
+
+
+/* =========================
+MESSAGE ANIMATION
+========================= */
+
+@keyframes fadeIn{
+
+from{
+
+opacity:
+0;
+
+transform:
+translateY(
+10px
+);
+
+}
+
+to{
+
+opacity:
+1;
+
+transform:
+translateY(
+0
+);
+
+}
+
+}
+
+
+
+
+/* =========================
+TYPING EFFECT
+========================= */
+
+.typing{
+
+border-right:
+2px solid #0078d4;
+
+padding-right:
+4px;
+
+animation:
+blink 0.7s infinite;
+
+}
+
+
+
+@keyframes blink{
+
+50%{
+
+border-color:
+transparent;
+
+}
+
+}
+
+
+
+
+/* =========================
+LOADING
+========================= */
+
+.loading{
+
+font-size:
+18px;
+
+}
+
+
+
+.hidden{
+
+display:
+none;
+
+}
+
+
+
+
+/* =========================
+CHATBOT
+========================= */
+
+.chatbot-wrapper{
+
+position:
+fixed;
+
+bottom:
+25px;
+
+right:
+25px;
+
+}
+
+
+
+.chatbot-button{
+
+width:
+60px;
+
+height:
+60px;
+
+border-radius:
+50%;
+
+background:
+#0078d4;
+
+display:
+flex;
+
+justify-content:
+center;
+
+align-items:
+center;
+
+color:
+white;
+
+font-size:
+24px;
+
+cursor:
+pointer;
+
+}
+
+
+
+.chatbot-panel{
+
+display:
+none;
+
+margin-top:
+10px;
+
+background:
+white;
+
+padding:
+10px;
+
+border-radius:
+12px;
+
+}
+
+
+
+.dark-mode
+.chatbot-panel{
+
+background:
+#333;
+
+}
+
+.source-box{
+
+    margin-top:12px;
+
+    padding-top:10px;
+
+    border-top:1px solid #ddd;
+
+    font-size:13px;
+
+    color:#666;
+
+    line-height:1.6;
+
+}
+
+.dark-mode .source-box{
+
+    color:#bbb;
+
+    border-top:1px solid #555;
+
+}
+
+
+/* =========================
+ADD FILE BUTTON
+========================= */
+
+#addFileBtn{
+
+width:
+55px;
+
+height:
+55px;
+
+border:
+none;
+
+border-radius:
+50%;
+
+background:
+#0078d4;
+
+color:
+white;
+
+font-size:
+28px;
+
+font-weight:
+bold;
+
+cursor:
+pointer;
+
+flex-shrink:
+0;
+
+transition:
+0.2s;
+
+}
+
+
+
+#addFileBtn:hover{
+
+transform:
+scale(1.08);
+
+}
+
+
+
+.dark-mode
+#addFileBtn{
+
+background:
+#1e88e5;
+
+}
+

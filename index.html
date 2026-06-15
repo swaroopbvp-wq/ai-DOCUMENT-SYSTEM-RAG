@@ -1,84 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Document System</title>
 
-  <!-- Optional external CSS (safe to keep) -->
-  <link rel="stylesheet" href="style.css" />
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>
+AI Document Intelligence
+</title>
+
+<link
+rel="stylesheet"
+href="style.css">
+
 </head>
+
 <body>
 
-  <!-- Top navigation -->
-  <div class="top-bar">
+<!-- =====================
+TOP BAR
+===================== -->
+
+<div class="top-bar">
+
+    <!-- RECENTS -->
+
     <div class="dropdown">
-      <button class="dropbtn">📂 Recents ⬇</button>
-      <div class="dropdown-content" id="recentsList">
-        <p style="color: gray; font-size: 14px; padding: 8px;">
-          No recent documents
-        </p>
-      </div>
+
+        <button
+        class="dropbtn"
+        id="recentsBtn">
+        📂 Recents ▼
+        </button>
+
+        <div
+        class="dropdown-content"
+        id="recentsList">
+
+            <p>
+            No recent files
+            </p>
+
+        </div>
+
     </div>
+
+
+    <!-- SETTINGS -->
 
     <div class="settings">
-      <button id="settingsBtn" type="button">⚙️</button>
-      <div class="settings-panel" id="settingsPanel">
-        <label class="switch">
-          <input type="checkbox" id="themeToggle" />
-          <span class="slider"></span>
-        </label>
-        <span id="themeLabel">🌞 Light Mode</span>
-      </div>
-    </div>
-  </div>
 
-  <!-- Main container -->
-  <div class="container">
-    <h2 id="greetingMsg">Hello!</h2>
-    <h1>📄 AI Document Intelligence</h1>
+        <button
+        id="settingsBtn"
+        type="button">
+        ⚙️
+        </button>
 
-    <!-- File Upload -->
-    <div class="custom-upload">
-      <label for="fileInput">📁 Upload Document</label>
-      <input type="file" id="fileInput" />
-      <p id="fileDetails"></p>
-    </div>
+        <div
+        id="settingsPanel"
+        class="settings-panel">
 
-    <!-- Question Input (ID FIXED & CONSISTENT) -->
-    <div class="input-group">
-      <input
-        type="text"
-        id="questionInput"
-        placeholder="Ask anything about the document..."
-      />
+            <p>
+            Appearance
+            </p>
+
+            <button
+            id="lightModeBtn">
+            ☀️ Light Mode
+            </button>
+
+            <button
+            id="darkModeBtn">
+            🌙 Dark Mode
+            </button>
+
+        </div>
+
     </div>
 
-    <!-- Submit Button -->
-    <button id="submitBtn" type="button">Submit</button>
+</div>
 
-    <!-- Backend / Logic Response -->
-    <div id="responseBox"></div>
 
-    <!-- Status / Error Messages -->
-    <div id="messageBox"></div>
-  </div>
 
-  <!-- Floating Chatbot -->
-  <div class="chatbot-wrapper">
-    <div class="chatbot-button" id="chatbotToggle">💬</div>
-    <div class="chatbot-panel" id="chatbotPanel">
-      <input
+<!-- =====================
+MAIN CONTAINER
+===================== -->
+
+<div class="container">
+
+    <h2 id="greetingMsg">
+    Hello!
+    </h2>
+
+    <h1>
+    📄 AI Document Intelligence
+    </h1>
+
+    <p>
+    Ask intelligent questions from your uploaded documents
+    </p>
+
+
+    <!-- =====================
+FILE INFO
+===================== -->
+
+<p id="fileDetails"></p>
+
+
+<!-- =====================
+SEARCH MODE
+===================== -->
+
+
+
+<!-- =====================
+QUESTION BAR
+===================== -->
+
+<div class="input-group">
+
+    <button
+    id="addFileBtn"
+    type="button">
+    +
+    </button>
+
+    <input
+    type="text"
+    id="questionInput"
+    placeholder="Ask anything about your documents...">
+
+</div>
+
+
+    <!-- Hidden File Input -->
+
+    <input
+    type="file"
+    id="fileInput"
+    multiple
+    style="display:none">
+
+
+    <!-- =====================
+    SUBMIT
+    ===================== -->
+
+    <button
+    id="submitBtn"
+    type="button">
+    Submit
+    </button>
+
+
+    <!-- =====================
+    CHAT AREA
+    ===================== -->
+
+    <div
+    id="responseBox">
+    </div>
+
+
+    <!-- =====================
+    LOADING
+    ===================== -->
+
+    <div
+    id="loading"
+    class="loading hidden">
+
+        🤖 Thinking
+
+        <span
+        class="dots">
+        </span>
+
+    </div>
+
+
+    <!-- =====================
+    MESSAGE BOX
+    ===================== -->
+
+    <div
+    id="messageBox">
+    </div>
+
+</div>
+
+
+
+<!-- =====================
+CHATBOT
+===================== -->
+
+<div
+class="chatbot-wrapper">
+
+    <div
+    class="chatbot-button"
+    id="chatbotToggle">
+    💬
+    </div>
+
+    <div
+    class="chatbot-panel"
+    id="chatbotPanel">
+
+        <input
         type="text"
         id="chatbotQuery"
-        placeholder="Type your query..."
-      />
-      <button id="chatbotSend" type="button">Send</button>
-    </div>
-  </div>
+        placeholder="Type your query...">
 
-  <!-- JavaScript -->
-  <script src="script.js"></script>
+        <button
+        id="chatbotSend"
+        type="button">
+        Send
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================
+SCRIPT
+===================== -->
+
+<script
+src="script.js">
+</script>
 
 </body>
+
 </html>

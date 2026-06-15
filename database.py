@@ -10,6 +10,7 @@ def get_connection():
 
 
 def init_db():
+
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -39,6 +40,7 @@ def init_db():
 
 
 def insert_document(filename, content):
+
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -59,16 +61,79 @@ def insert_document(filename, content):
 
 
 def insert_query(document_id, question, answer):
+
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
         """
-        INSERT INTO queries (document_id, question, answer)
+        INSERT INTO queries (
+            document_id,
+            question,
+            answer
+        )
         VALUES (?, ?, ?)
         """,
-        (document_id, question, answer)
+        (
+            document_id,
+            question,
+            answer
+        )
     )
 
     conn.commit()
     conn.close()
+
+
+# ==================================
+# CITATIONS SUPPORT
+# ==================================
+
+def get_document_filename(document_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT filename
+        FROM documents
+        WHERE id = ?
+        """,
+        (document_id,)
+    )
+
+    row = cursor.fetchone()
+
+    conn.close()
+
+    if row:
+
+        return row["filename"]
+
+    return "Unknown Document"
+
+
+# ==================================
+# OPTIONAL HELPER
+# Useful later for multi-document support
+# ==================================
+
+def get_all_documents():
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT id, filename
+        FROM documents
+        ORDER BY uploaded_at DESC
+        """
+    )
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return rows

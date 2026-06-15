@@ -2,8 +2,18 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from database import init_db, insert_document, insert_query, get_connection
-from vector_store import add_document, search
+from database import (
+    init_db,
+    insert_document,
+    insert_query,
+    get_connection,
+    get_document_filename
+)
+
+from vector_store import (
+    add_document,
+    search
+)
 
 import pdfplumber
 from docx import Document
@@ -11,25 +21,29 @@ import io
 
 from dotenv import load_dotenv
 import os
+
 from openai import OpenAI
 
 
-# ===================== LOAD ENV =====================
+# ==================================================
+# LOAD ENV
+# ==================================================
 
 load_dotenv()
 
+API_KEY = os.getenv("AICREDITS_API_KEY")
+
+print("API Loaded:", API_KEY is not None)
+
 client = OpenAI(
-    api_key=os.getenv("SAMBANOVA_API_KEY"),
-    base_url="https://api.sambanova.ai/v1"
-)
-
-print(
-    "API loaded:",
-    os.getenv("SAMBANOVA_API_KEY") is not None
+    api_key=API_KEY,
+    base_url="https://api.aicredits.in/v1"
 )
 
 
-# ===================== FASTAPI =====================
+# ==================================================
+# FASTAPI APP
+# ==================================================
 
 app = FastAPI()
 
@@ -42,12 +56,16 @@ app.add_middleware(
 )
 
 
-# ===================== INIT DATABASE =====================
+# ==================================================
+# DATABASE INIT
+# ==================================================
 
 init_db()
 
 
-# ===================== LOAD OLD DOCS =====================
+# ==================================================
+# LOAD EXISTING DOCUMENTS INTO FAISS
+# ==================================================
 
 @app.on_event("startup")
 def load_existing_documents():
@@ -68,11 +86,8 @@ def load_existing_documents():
         if row["content"]:
 
             add_document(
-
                 row["id"],
-
                 row["content"]
-
             )
 
     print(
@@ -80,251 +95,237 @@ def load_existing_documents():
     )
 
 
-# ===================== REQUEST MODEL =====================
+# ==================================================
+# REQUEST MODEL
+# ==================================================
 
 class AskRequest(BaseModel):
 
-    document_id: int
-
+    
     question: str
 
 
-# ===================== HEALTH =====================
+# ==================================================
+# HEALTH CHECK
+# ==================================================
 
 @app.get("/ping")
 def ping():
 
     return {
-
-        "status":
-
-        "Backend OK"
-
+        "status": "Backend OK"
     }
 
 
-# ===================== UPLOAD =====================
+# ==================================================
+# DOCUMENT UPLOAD
+# ==================================================
 
 @app.post("/upload")
 async def upload_doc(
-        file: UploadFile = File(...)
+    files: list[UploadFile] = File(...)
 ):
 
-    filename = file.filename.lower()
+    uploaded_docs = []
 
-    raw_content = await file.read()
+    for file in files:
 
-    extracted_text = ""
+        filename = file.filename.lower()
 
+        raw_content = await file.read()
 
-    try:
+        extracted_text = ""
 
-        if filename.endswith(".txt"):
+        try:
 
-            extracted_text = raw_content.decode(
-                "utf-8"
-            )
+            # TXT
+            if filename.endswith(".txt"):
 
-
-        elif filename.endswith(".pdf"):
-
-            with pdfplumber.open(
-                io.BytesIO(raw_content)
-            ) as pdf:
-
-                for page in pdf.pages:
-
-                    text = page.extract_text()
-
-                    if text:
-
-                        extracted_text += (
-
-                            text + "\n"
-
-                        )
-
-
-        elif filename.endswith(".docx"):
-
-            doc = Document(
-                io.BytesIO(raw_content)
-            )
-
-            for para in doc.paragraphs:
-
-                extracted_text += (
-
-                    para.text + "\n"
-
+                extracted_text = raw_content.decode(
+                    "utf-8"
                 )
 
+            # PDF
+            elif filename.endswith(".pdf"):
 
-        else:
+                with pdfplumber.open(
+                    io.BytesIO(raw_content)
+                ) as pdf:
 
-            return {
+                    for page in pdf.pages:
 
-                "message":
+                        text = page.extract_text()
 
-                "Unsupported format"
+                        if text:
 
-            }
+                            extracted_text += (
+                                text + "\n"
+                            )
 
+            # DOCX
+            elif filename.endswith(".docx"):
 
-    except Exception as e:
+                doc = Document(
+                    io.BytesIO(raw_content)
+                )
 
-        print(
+                for para in doc.paragraphs:
 
-            "Extraction error:",
+                    extracted_text += (
+                        para.text + "\n"
+                    )
 
-            e
+            else:
+
+                continue
+
+        except Exception as e:
+
+            print(
+                "DOCUMENT ERROR:",
+                e
+            )
+
+            continue
+
+        if not extracted_text.strip():
+
+            continue
+
+        doc_id = insert_document(
+
+            filename,
+
+            extracted_text
 
         )
 
-        return {
+        add_document(
 
-            "message":
+            doc_id,
 
-            "Parsing failed"
+            extracted_text
 
-        }
+        )
 
+        uploaded_docs.append({
 
+            "document_id":
+            doc_id,
 
-    if not extracted_text.strip():
+            "filename":
+            filename
 
-        return {
+        })
 
-            "message":
-
-            "No readable text"
-
-        }
-
-
-
-    doc_id = insert_document(
-
-        filename,
-
-        extracted_text
-
-    )
-
-
-    add_document(
-
-        doc_id,
-
-        extracted_text
-
-    )
-
+        print(
+            f"Document {doc_id} indexed."
+        )
 
     return {
 
         "message":
+        "Documents uploaded successfully",
 
-        "Uploaded successfully",
-
-        "document_id":
-
-        doc_id
+        "documents":
+        uploaded_docs
 
     }
 
 
-# ===================== ASK =====================
+
+
+# ==================================================
+# ASK QUESTION
+# ==================================================
 
 @app.post("/ask")
 def ask_doc(
-        data: AskRequest
+    data: AskRequest
 ):
 
-    print(
-        "\n----- NEW REQUEST -----"
-    )
+    print("\n========== NEW REQUEST ==========")
 
-    print(
-        "Document:",
-
-        data.document_id
-    )
+    
 
     print(
         "Question:",
-
         data.question
     )
 
-
+    # Retrieve relevant chunks
     chunks = search(
 
         query=data.question,
 
-        document_id=data.document_id
+        document_id=None
 
     )
-
 
     print(
-
-        "Retrieved chunks:",
-
-        chunks
-
+        "Chunks retrieved:",
+        len(chunks)
     )
 
-
+    # No chunks found
     if not chunks:
 
         return {
-
             "answer":
-
-            "No relevant information found in document."
-
+            "No relevant information found in the document.",
+            "sources": []
         }
 
+    context = ""
 
+    sources = []
 
-    context = "\n".join(
+    for chunk in chunks:
 
-        chunks
+        context += chunk["content"] + "\n"
 
-    )
+        source = {
+            "file": get_document_filename(
+                chunk["doc_id"]
+            ),
+            "chunk": chunk["chunk_id"]
+        }
 
+        if source not in sources:
+            sources.append(source)
 
-    # ========= IMPROVED PROMPT =========
+    # ==================================================
+    # PROMPT
+    # ==================================================
 
     prompt = f"""
 
-You are an intelligent AI document assistant.
+You are an AI document assistant.
 
-Answer ONLY using information from the document.
+Answer ONLY using the provided document context.
 
-Document:
+DOCUMENT:
 
 {context}
 
 
-Question:
+QUESTION:
 
 {data.question}
 
 
-Instructions:
+RULES:
 
-- Answer in complete sentences.
-- Sound natural and professional.
-- Explain briefly.
-- Do NOT invent information.
+- Answer naturally
+- Use complete sentences
+- Do NOT invent information
+- Keep answers concise
 - If answer missing, say:
 
 "The information was not found in the document."
 
 
-Examples:
+EXAMPLE:
 
 Question:
 What is the total amount?
@@ -333,98 +334,70 @@ Answer:
 The total amount is 1200 Rupees.
 
 
-Question:
-Who is the customer?
-
-Answer:
-The customer name is Rahul.
-
-
-Now answer:
+Now answer the question.
 
 """
 
-
     try:
 
-        response = (
+        response = client.chat.completions.create(
 
-            client.chat.completions.create(
+            model="anthropic/claude-3-haiku",
 
-                model="DeepSeek-V3.1",
+            messages=[
 
-                messages=[
+                {
+                    "role": "system",
+                    "content":
+                    "You answer questions based only on uploaded documents."
+                },
 
-                    {
+                {
+                    "role": "user",
+                    "content": prompt
+                }
 
-                        "role":
+            ],
 
-                        "system",
+            temperature=0.3,
 
-                        "content":
-
-                        "You answer questions from uploaded documents."
-
-                    },
-
-                    {
-
-                        "role":
-
-                        "user",
-
-                        "content":
-
-                        prompt
-
-                    }
-
-                ],
-
-                temperature=0.3
-
-            )
+            max_tokens=300
 
         )
-
 
         answer = (
-
             response
-
             .choices[0]
-
             .message
-
             .content
-
         )
-
 
     except Exception as e:
 
-        print(
+        print("LLM ERROR:", e)
 
-            "LLM ERROR:",
+        if "401" in str(e):
 
-            e
+            answer = (
+                "⚠️ Invalid API key configuration."
+            )
 
-        )
+        elif "429" in str(e):
 
+            answer = (
+                "⚠️ AI service is busy right now. Please try again shortly."
+            )
 
-        answer = (
+        else:
 
-            "Error generating answer: "
+            answer = (
+                "⚠️ Error generating answer."
+            )
 
-            + str(e)
-
-        )
-
-
-
+    # Save query history
     insert_query(
 
-        data.document_id,
+        0,
 
         data.question,
 
@@ -432,94 +405,66 @@ Now answer:
 
     )
 
-
     return {
-
-        "answer":
-
-        answer
-
+        "answer": answer,
+        "sources": sources
     }
 
 
-# ===================== HISTORY =====================
+# ==================================================
+# HISTORY
+# ==================================================
 
-@app.get(
-    "/history/{document_id}"
-)
-
+@app.get("/history/{document_id}")
 def get_history(
-        document_id: int
+    document_id: int
 ):
 
     conn = get_connection()
 
     cursor = conn.cursor()
 
-
     cursor.execute(
 
         """
-
         SELECT
-
         question,
-
         answer,
-
         asked_at
 
         FROM queries
 
-        WHERE document_id=?
+        WHERE document_id = ?
 
         ORDER BY asked_at DESC
-
         """,
 
-        (
-
-            document_id,
-
-        )
+        (document_id,)
 
     )
-
 
     rows = cursor.fetchall()
 
     conn.close()
 
-
     if not rows:
 
         return {
-
             "message":
-
-            "No history"
-
+            "No history found"
         }
-
 
     return [
 
         {
-
             "question":
-
             row["question"],
 
-
             "answer":
-
             row["answer"],
 
-
             "asked_at":
-
             row["asked_at"]
-
         }
 
         for row in rows

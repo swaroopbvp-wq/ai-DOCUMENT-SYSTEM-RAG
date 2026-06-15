@@ -1,255 +1,948 @@
 // ==============================
 // CONFIG
 // ==============================
-const BASE_URL = "http://127.0.0.1:8000";
+
+const BASE_URL =
+"http://127.0.0.1:8000";
+
+let documentId =
+null;
+
+
+
 
 // ==============================
-// Globals
+// FILE SIZE
 // ==============================
-let documentId = null;
 
-// ==============================
-// Utility
-// ==============================
-function formatFileSize(bytes) {
-  const kb = bytes / 1024;
-  return kb > 1024
-    ? (kb / 1024).toFixed(2) + " MB"
-    : kb.toFixed(2) + " KB";
-}
+function formatFileSize(bytes){
 
-// ==============================
-// Greeting
-// ==============================
-function setGreeting() {
-  const h = new Date().getHours();
-  const g = document.getElementById("greetingMsg");
+const kb =
+bytes/1024;
 
-  if (!g) return;
 
-  g.innerText =
-    h < 12 ? "🌞 Good Morning!" :
-    h < 18 ? "☀️ Good Afternoon!" :
-    "🌙 Good Evening!";
-}
+return kb>1024
 
-// ==============================
-// Recents
-// ==============================
-function saveToRecents(fileName, fileSize) {
-  let recents = JSON.parse(localStorage.getItem("recents")) || [];
+?
 
-  recents.unshift({ name: fileName, size: fileSize });
+(kb/1024)
+.toFixed(2)
 
-  recents = recents.slice(0, 5);
++
 
-  localStorage.setItem("recents", JSON.stringify(recents));
+" MB"
 
-  renderRecents();
-}
+:
 
-function renderRecents() {
+kb.toFixed(2)
 
-  const recentsList = document.getElementById("recentsList");
++
 
-  if (!recentsList) return;
-
-  const recents = JSON.parse(localStorage.getItem("recents")) || [];
-
-  if (!recents.length) {
-    recentsList.innerHTML =
-      `<p style="color: gray; font-size: 14px;">No recent documents</p>`;
-    return;
-  }
-
-  recentsList.innerHTML = "";
-
-  recents.forEach(f => {
-
-    const div = document.createElement("div");
-
-    div.innerText = `📄 ${f.name} (${f.size})`;
-
-    recentsList.appendChild(div);
-
-  });
-}
-
-// ==============================
-// Backend Check
-// ==============================
-async function checkBackend() {
-
-  try {
-
-    const res = await fetch(`${BASE_URL}/ping`);
-
-    if (!res.ok) throw new Error();
-
-    console.log("✅ Backend connected");
-
-    return true;
-
-  } catch {
-
-    console.error("❌ Backend not reachable");
-
-    return false;
-  }
-}
-
-// ==============================
-// Upload Document
-// ==============================
-const fileInput = document.getElementById("fileInput");
-
-if (fileInput) {
-
-  fileInput.addEventListener("change", async (e) => {
-
-    const file = e.target.files[0];
-
-    if (!file) return;
-
-    document.getElementById("fileDetails").innerText =
-      `📄 ${file.name} (${formatFileSize(file.size)})`;
-
-    saveToRecents(file.name, formatFileSize(file.size));
-
-    const backendAlive = await checkBackend();
-
-    if (!backendAlive) {
-      alert("Backend not running on port 8000");
-      return;
-    }
-
-    try {
-
-      const formData = new FormData();
-
-      formData.append("file", file);
-
-      const res = await fetch(`${BASE_URL}/upload`, {
-        method: "POST",
-        body: formData
-      });
-
-      if (!res.ok) throw new Error("Upload failed");
-
-      const data = await res.json();
-
-      documentId = data.document_id;
-
-      console.log("✅ Upload successful. Document ID:", documentId);
-
-    } catch (err) {
-
-      console.error("Upload error:", err);
-
-      alert("Upload failed. Check backend.");
-
-    }
-
-  });
+" KB";
 
 }
 
+
+
+
 // ==============================
-// Ask Question
+// GREETING
 // ==============================
-const submitBtn = document.getElementById("submitBtn");
 
-if (submitBtn) {
+function setGreeting(){
 
-  submitBtn.addEventListener("click", async () => {
+const h =
+new Date()
+.getHours();
 
-    const questionInput = document.getElementById("questionInput");
 
-    const responseBox = document.getElementById("responseBox");
+const g =
+document.getElementById(
+"greetingMsg"
+);
 
-    const messageBox = document.getElementById("messageBox");
 
-    const question = questionInput.value.trim();
+if(h<12){
 
-    if (!documentId) {
-
-      messageBox.style.display = "block";
-
-      messageBox.innerText = "Please upload a document first.";
-
-      return;
-    }
-
-    if (!question) {
-
-      messageBox.style.display = "block";
-
-      messageBox.innerText = "Please enter a question.";
-
-      return;
-    }
-
-    messageBox.style.display = "none";
-
-    responseBox.innerText = "⏳ Processing...";
-
-    try {
-
-      const res = await fetch(`${BASE_URL}/ask`, {
-
-        method: "POST",
-
-        headers: { "Content-Type": "application/json" },
-
-        body: JSON.stringify({
-          document_id: documentId,
-          question: question
-        })
-
-      });
-
-      if (!res.ok) throw new Error();
-
-      const data = await res.json();
-
-      responseBox.innerText = data.answer;
-
-    } catch (err) {
-
-      console.error(err);
-
-      responseBox.innerText = "❌ Backend error";
-
-    }
-
-  });
+g.innerText=
+"🌞 Good Morning!";
 
 }
 
-// ==============================
-// Theme Toggle
-// ==============================
-const themeToggle = document.getElementById("themeToggle");
+else if(h<18){
 
-if (themeToggle) {
-
-  themeToggle.addEventListener("change", (e) => {
-
-    document.body.classList.toggle("dark-mode", e.target.checked);
-
-  });
+g.innerText=
+"☀️ Good Afternoon!";
 
 }
 
+else{
+
+g.innerText=
+"🌙 Good Evening!";
+
+}
+
+}
+
+
+
+
 // ==============================
-// On Load
+// TYPING EFFECT
 // ==============================
-window.addEventListener("DOMContentLoaded", async () => {
 
-  setGreeting();
+async function typeText(
+element,
+text,
+speed = 15
+){
 
-  renderRecents();
+element.innerHTML = "";
 
-  await checkBackend();
+for(
+let i=0;
+i<text.length;
+i++
+){
+
+element.innerHTML +=
+text.charAt(i);
+
+
+await new Promise(
+
+resolve =>
+setTimeout(
+resolve,
+speed
+)
+
+);
+
+}
+
+}
+
+
+
+
+// ==============================
+// SAVE RECENTS
+// ==============================
+
+function saveToRecents(
+name,
+size,
+id
+){
+
+let recents =
+
+JSON.parse(
+
+localStorage.getItem(
+"recents"
+)
+
+)
+
+||
+
+[];
+
+
+
+recents.unshift({
+
+name,
+size,
+id
 
 });
+
+
+
+recents =
+recents.slice(
+0,
+5
+);
+
+
+
+localStorage.setItem(
+
+"recents",
+
+JSON.stringify(
+recents
+)
+
+);
+
+
+
+renderRecents();
+
+}
+
+
+
+
+
+// ==============================
+// RENDER RECENTS
+// ==============================
+
+function renderRecents(){
+
+const list =
+
+document.getElementById(
+"recentsList"
+);
+
+
+
+const recents =
+
+JSON.parse(
+
+localStorage.getItem(
+"recents"
+)
+
+)
+
+||
+
+[];
+
+
+
+list.innerHTML = "";
+
+
+
+if(
+!recents.length
+){
+
+list.innerHTML =
+
+"<p>No recent files</p>";
+
+return;
+
+}
+
+
+
+recents.forEach(
+
+file=>{
+
+
+const div =
+
+document.createElement(
+"div"
+);
+
+
+
+div.innerHTML =
+
+`
+
+📄 ${file.name}
+
+<br>
+
+<small>
+
+${file.size}
+
+</small>
+
+`;
+
+
+
+
+div.onclick = ()=>{
+
+
+document
+
+.getElementById(
+"fileDetails"
+)
+
+.innerText =
+
+`${file.name}
+
+(${file.size})`;
+
+
+
+documentId =
+
+Number(
+file.id
+);
+
+
+
+document
+
+.getElementById(
+"recentsList"
+)
+
+.classList
+
+.remove(
+"show"
+);
+
+
+};
+
+
+
+list.appendChild(
+div
+);
+
+}
+
+);
+
+}
+
+
+
+
+
+// ==============================
+// RECENTS TOGGLE
+// ==============================
+
+document
+
+.getElementById(
+"recentsBtn"
+)
+
+.addEventListener(
+
+"click",
+
+()=>{
+
+document
+
+.getElementById(
+"recentsList"
+)
+
+.classList
+
+.toggle(
+"show"
+);
+
+}
+
+);
+
+
+
+
+
+
+// ==============================
+// SETTINGS PANEL
+// ==============================
+
+document
+
+.getElementById(
+"settingsBtn"
+)
+
+.addEventListener(
+
+"click",
+
+()=>{
+
+
+document
+
+.getElementById(
+"settingsPanel"
+)
+
+.classList
+
+.toggle(
+"show"
+);
+
+
+}
+
+);
+
+
+
+
+
+
+// ==============================
+// LIGHT MODE
+// ==============================
+
+document
+
+.getElementById(
+"lightModeBtn"
+)
+
+.addEventListener(
+
+"click",
+
+()=>{
+
+
+document.body
+
+.classList
+
+.remove(
+"dark-mode"
+);
+
+
+
+localStorage.setItem(
+
+"theme",
+
+"light"
+
+);
+
+
+}
+
+);
+
+
+
+
+
+
+// ==============================
+// DARK MODE
+// ==============================
+
+document
+
+.getElementById(
+"darkModeBtn"
+)
+
+.addEventListener(
+
+"click",
+
+()=>{
+
+
+document.body
+
+.classList
+
+.add(
+"dark-mode"
+);
+
+
+
+localStorage.setItem(
+
+"theme",
+
+"dark"
+
+);
+
+
+}
+
+);
+
+
+
+// ==============================
+// ADD FILE BUTTON
+// ==============================
+
+document
+
+.getElementById(
+"addFileBtn"
+)
+
+.addEventListener(
+
+"click",
+
+()=>{
+
+document
+
+.getElementById(
+"fileInput"
+)
+
+.click();
+
+}
+
+);
+
+
+
+
+
+
+// ==============================
+// FILE UPLOAD
+// ==============================
+
+document
+
+.getElementById(
+"fileInput"
+)
+
+.addEventListener(
+
+"change",
+
+async(
+e
+)=>{
+
+const files =
+
+e.target.files;
+console.log("Files selected:", files.length);
+
+if(
+!files.length
+)
+return;
+
+let fileNames = [];
+
+const formData =
+
+new FormData();
+
+for(
+let file of files
+){
+
+fileNames.push(
+file.name
+);
+
+formData.append(
+"files",
+file
+);
+
+}
+
+document
+
+.getElementById(
+"fileDetails"
+)
+
+.innerHTML =
+
+fileNames.join(
+"<br>"
+);
+
+try{
+
+const res =
+
+await fetch(
+
+`${BASE_URL}/upload`,
+
+{
+
+method:
+"POST",
+
+body:
+formData
+
+}
+
+);
+
+const data =
+
+await res.json();
+
+if(
+data.documents &&
+data.documents.length > 0
+){
+
+documentId =
+
+data.documents[0]
+.document_id;
+
+for(
+let doc of data.documents
+){
+
+saveToRecents(
+
+doc.filename,
+
+"Uploaded",
+
+doc.document_id
+
+);
+
+}
+
+}
+
+}
+
+catch{
+
+alert(
+"Upload failed"
+);
+
+}
+
+}
+);
+
+
+
+
+
+
+// ==============================
+// ASK QUESTION
+// ==============================
+
+document
+
+.getElementById(
+"submitBtn"
+)
+
+.addEventListener(
+
+"click",
+
+async()=>{
+
+const question =
+
+document
+
+.getElementById(
+"questionInput"
+)
+
+.value
+
+.trim();
+
+const recents =
+
+JSON.parse(
+localStorage.getItem(
+"recents"
+)
+) || [];
+
+if(
+recents.length === 0
+){
+
+alert(
+"Upload at least one document first"
+);
+
+return;
+
+}
+
+if(
+!question
+){
+
+return;
+
+}
+
+
+
+const responseBox =
+
+document
+
+.getElementById(
+"responseBox"
+);
+
+responseBox.innerHTML +=
+
+`
+
+<div class="user-message">
+
+👤 You
+
+<br><br>
+
+${question}
+
+</div>
+
+`;
+
+
+// CREATE AI BUBBLE
+
+const aiDiv =
+
+document.createElement(
+"div"
+);
+
+aiDiv.className =
+"ai-message";
+
+aiDiv.innerHTML =
+
+`
+
+🤖 AI
+
+<br><br>
+
+<span class="typing">
+
+Thinking...
+
+</span>
+
+`;
+
+responseBox.appendChild(
+aiDiv
+);
+
+const typingSpan =
+
+aiDiv.querySelector(
+".typing"
+);
+
+responseBox.scrollTop =
+
+responseBox.scrollHeight;
+
+try{
+
+const res =
+
+await fetch(
+
+`${BASE_URL}/ask`,
+
+{
+
+method:
+"POST",
+
+headers:{
+
+"Content-Type":
+
+"application/json"
+
+},
+
+body:
+
+JSON.stringify({
+
+question:
+
+question
+
+})
+
+}
+
+);
+
+const data =
+
+await res.json();
+
+await typeText(
+
+typingSpan,
+
+data.answer,
+
+15
+
+);
+
+
+// ==============================
+// SHOW SOURCES
+// ==============================
+
+if (
+
+data.sources &&
+
+data.sources.length > 0
+
+){
+
+let sourceHtml =
+
+"<br><br>📌 Sources:<br>";
+
+data.sources.forEach(
+
+src => {
+
+sourceHtml +=
+
+`${src.file}
+(Chunk ${src.chunk})<br>`;
+
+}
+
+);
+
+aiDiv.innerHTML +=
+
+`
+
+<div class="source-box">
+
+${sourceHtml}
+
+</div>
+
+`;
+
+}
+
+document
+
+.getElementById(
+"questionInput"
+)
+
+.value = "";
+
+responseBox.scrollTop =
+
+responseBox.scrollHeight;
+
+}
+
+catch{
+
+typingSpan.innerHTML =
+
+"❌ Backend Error";
+
+}
+
+}
+
+);
+
+
+
+// ==============================
+// PAGE LOAD
+// ==============================
+
+window.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+setGreeting();
+
+
+renderRecents();
+
+
+
+
+// restore theme
+
+const savedTheme =
+
+localStorage.getItem(
+"theme"
+);
+
+
+
+if(
+savedTheme==="dark"
+){
+
+document.body
+
+.classList
+
+.add(
+"dark-mode"
+);
+
+}
+
+
+}
+
+);
