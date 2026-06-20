@@ -69,32 +69,7 @@ init_db()
 
 @app.on_event("startup")
 def load_existing_documents():
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "SELECT id, content FROM documents"
-    )
-
-    rows = cursor.fetchall()
-
-    conn.close()
-
-    for row in rows:
-
-        if row["content"]:
-
-            add_document(
-                row["id"],
-                row["content"]
-            )
-
-    print(
-        f"Loaded {len(rows)} documents into FAISS."
-    )
-
-
+    print("Skipping FAISS preload")
 # ==================================================
 # REQUEST MODEL
 # ==================================================

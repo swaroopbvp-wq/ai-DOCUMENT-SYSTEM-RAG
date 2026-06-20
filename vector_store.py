@@ -2,15 +2,26 @@ import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
+def get_model():
+
+    global model
+
+    if model is None:
+
+        print("Loading embedding model...")
+
+        model = SentenceTransformer(
+            "paraphrase-MiniLM-L3-v2"
+        )
+
+    return model
+
 
 # ==================================================
 # LOAD EMBEDDING MODEL
 # ==================================================
 
-model = SentenceTransformer(
-    "all-MiniLM-L6-v2"
-)
-
+model = None
 dimension = 384
 
 index = faiss.IndexFlatL2(
@@ -56,19 +67,18 @@ def chunk_text(
 # EMBEDDING
 # ==================================================
 
-def embed_text(
-        text: str
-):
+def embed_text(text: str):
 
-    embedding = model.encode(
-        [text]
-    )[0]
-
+    embedding = get_model().encode(
+    [text],
+    convert_to_numpy=True,
+    show_progress_bar=False
+)[0]
     return np.array(
-        embedding,
-        dtype="float32"
+        embedding
+    ).astype(
+        "float32"
     )
-
 
 # ==================================================
 # ADD DOCUMENT
