@@ -1,6 +1,8 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from database import (
     init_db,
@@ -55,6 +57,11 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+app.mount(
+    "/static",
+    StaticFiles(directory="."),
+    name="static"
+)
 
 # ==================================================
 # DATABASE INIT
@@ -445,3 +452,10 @@ def get_history(
         for row in rows
 
     ]
+
+@app.get("/")
+def home():
+
+    return FileResponse(
+        "index.html"
+    )
